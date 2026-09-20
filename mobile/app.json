@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "CareLink AI",
+    "slug": "carelink-ai",
+    "version": "0.3.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "scheme": "carelink",
+    "assetBundlePatterns": ["**/*"],
+    "android": {
+      "package": "com.carelinkai.mobile"
+    },
+    "ios": {
+      "bundleIdentifier": "com.carelinkai.mobile"
+    }
+  }
+}
