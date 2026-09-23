@@ -38,7 +38,7 @@ export default function HomeScreen({ navigation }: Props) {
           <View style={styles.option}><Text style={styles.icon}>◷</Text><Text style={styles.optionTitle}>Appointments</Text><Text style={styles.optionText}>Appointment flow comes next.</Text></View>
         </View>
 
-        <View style={styles.profileCard}>
+        <Pressable style={styles.action} onPress={() => navigation.navigate("CareDirectory")}><Text style={styles.actionTitle}>Find a doctor or hospital</Text><Text style={styles.actionText}>Discover care options near you.</Text></Pressable><View style={styles.grid}><Pressable style={styles.option} onPress={() => navigation.navigate("HomeVisit")}><Text style={styles.icon}>⌂</Text><Text style={styles.optionTitle}>Request home care</Text><Text style={styles.optionText}>Ask for professional care at home.</Text></Pressable><Pressable style={styles.option} onPress={() => navigation.navigate("Appointments")}><Text style={styles.icon}>◷</Text><Text style={styles.optionTitle}>Appointments</Text><Text style={styles.optionText}>View your appointment requests.</Text></Pressable><Pressable style={styles.option} onPress={() => navigation.navigate("Activity")}><Text style={styles.icon}>●</Text><Text style={styles.optionTitle}>Care activity</Text><Text style={styles.optionText}>Notifications, home visits and follow-ups.</Text></Pressable></View><View style={styles.profileCard}>
           <Text style={styles.profileTitle}>Your profile</Text>
           <Text style={styles.profileText}>{profile?.phone || "Phone not added"} · {profile?.address || "Address not added"}</Text>
         </View>
@@ -66,6 +66,9 @@ const styles = StyleSheet.create({
   icon: { fontSize: 23, color: colors.primary },
   optionTitle: { fontSize: 17, fontWeight: "800", color: colors.text, marginTop: spacing.xs },
   optionText: { color: colors.muted, marginTop: 4 },
+  action: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, borderWidth: 1, borderColor: colors.border, marginTop: spacing.md },
+  actionTitle: { fontSize: 17, fontWeight: "800", color: colors.text },
+  actionText: { color: colors.muted, marginTop: 4 },
   profileCard: { marginTop: spacing.xl, backgroundColor: colors.surface, padding: spacing.md, borderRadius: radius.md, borderWidth: 1, borderColor: colors.border },
   profileTitle: { fontWeight: "800", color: colors.text },
   profileText: { color: colors.muted, marginTop: 5 },
