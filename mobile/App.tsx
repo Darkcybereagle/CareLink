@@ -24,6 +24,7 @@ import ProviderHomeVisitsScreen from "./src/screens/ProviderHomeVisitsScreen";
 import ProviderSummariesScreen from "./src/screens/ProviderSummariesScreen";
 import ProviderProfileScreen from "./src/screens/ProviderProfileScreen";
 import ProviderMessagesScreen from "./src/screens/ProviderMessagesScreen";
+import ProviderActivityScreen from "./src/screens/ProviderActivityScreen";
 
 export type RootStackParamList = {
   Welcome: undefined;
@@ -45,6 +46,7 @@ export type RootStackParamList = {
   ProviderSummaries: undefined;
   ProviderProfile: undefined;
   ProviderMessages: undefined;
+  ProviderActivity: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
