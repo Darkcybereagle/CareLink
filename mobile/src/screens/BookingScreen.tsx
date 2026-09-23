@@ -1,0 +1,13 @@
+import React,{useState} from "react";
+import {Alert,Pressable,SafeAreaView,StyleSheet,Text,TextInput} from "react-native";
+import {NativeStackScreenProps} from "@react-navigation/native-stack";
+import {RootStackParamList} from "../../App";
+import {requestAppointment} from "../api/client";
+import {colors,radius,spacing} from "../theme";
+type Props=NativeStackScreenProps<RootStackParamList,"Booking">;
+export default function BookingScreen({route,navigation}:Props){
+ const [date,setDate]=useState(""); const [reason,setReason]=useState(""); const [busy,setBusy]=useState(false);
+ async function submit(){if(!date||reason.trim().length<3)return Alert.alert("CareLink","Enter the appointment date/time and reason.");setBusy(true);try{await requestAppointment(route.params.providerId,new Date(date).toISOString(),reason.trim());Alert.alert("CareLink","Appointment request sent.");navigation.navigate("Appointments");}catch(e){Alert.alert("CareLink",e instanceof Error?e.message:"Unable to request appointment.");}finally{setBusy(false);}}
+ return <SafeAreaView style={styles.safe}><Text style={styles.back} onPress={()=>navigation.goBack()}>‹ Back</Text><Text style={styles.brand}>CareLink <Text style={styles.ai}>AI</Text></Text><Text style={styles.title}>Request appointment</Text><Text style={styles.subtitle}>With {route.params.providerName}</Text><Text style={styles.label}>Date and time</Text><TextInput style={styles.input} placeholder="2026-10-01 10:00" value={date} onChangeText={setDate}/><Text style={styles.label}>What would you like help with?</Text><TextInput style={[styles.input,styles.multi]} multiline value={reason} onChangeText={setReason} placeholder="Briefly describe your reason for the appointment"/><Pressable style={styles.primary} onPress={submit} disabled={busy}><Text style={styles.primaryText}>{busy?"Sending...":"Send request"}</Text></Pressable></SafeAreaView>
+}
+const styles=StyleSheet.create({safe:{flex:1,backgroundColor:colors.background,padding:spacing.lg},back:{color:colors.primaryDark,fontWeight:"800"},brand:{fontSize:21,fontWeight:"800",color:colors.text,marginTop:spacing.lg},ai:{color:colors.primary},title:{fontSize:30,fontWeight:"800",color:colors.text,marginTop:spacing.xl},subtitle:{color:colors.muted,marginTop:5},label:{fontWeight:"800",color:colors.text,marginTop:spacing.xl,marginBottom:spacing.xs},input:{backgroundColor:colors.surface,borderWidth:1,borderColor:colors.border,borderRadius:radius.md,padding:15,fontSize:16},multi:{minHeight:120,textAlignVertical:"top"},primary:{backgroundColor:colors.primary,borderRadius:radius.pill,paddingVertical:16,alignItems:"center",marginTop:spacing.xl},primaryText:{color:"#fff",fontWeight:"800",fontSize:16}});
