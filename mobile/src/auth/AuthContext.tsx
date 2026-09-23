@@ -1,22 +1,17 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import {
-  clearToken,
-  createPatientProfile,
-  getMe,
-  getPatientProfile,
-  login,
-  register,
-  saveToken,
-  User,
-  PatientProfile,
+  clearToken, createPatientProfile, getMe, getPatientProfile, getProviderProfile,
+  login, register, saveToken, User, PatientProfile, ProviderProfile,
 } from "../api/client";
 
+type Destination = "home" | "onboarding" | "provider" | "providerSetup";
 type AuthContextValue = {
   user: User | null;
   profile: PatientProfile | null;
+  providerProfile: ProviderProfile | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<"home" | "onboarding">;
-  signUp: (name: string, email: string, password: string) => Promise<void>;
+  signIn: (email: string, password: string) => Promise<Destination>;
+  signUp: (name: string, email: string, password: string, role?: "patient" | "doctor" | "nurse") => Promise<Destination>;
   finishOnboarding: (payload: Parameters<typeof createPatientProfile>[0]) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -27,75 +22,69 @@ const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<PatientProfile | null>(null);
+  const [providerProfile, setProviderProfile] = useState<ProviderProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function loadSession() {
     try {
       const me = await getMe();
       setUser(me);
-      try {
-        setProfile(await getPatientProfile());
-      } catch {
-        setProfile(null);
+      if (me.role === "patient") {
+        try { setProfile(await getPatientProfile()); } catch { setProfile(null); }
+      } else if (me.role === "doctor" || me.role === "nurse") {
+        try { setProviderProfile(await getProviderProfile()); } catch { setProviderProfile(null); }
       }
     } catch {
-      setUser(null);
-      setProfile(null);
-    } finally {
-      setLoading(false);
-    }
+      setUser(null); setProfile(null); setProviderProfile(null);
+    } finally { setLoading(false); }
   }
 
-  useEffect(() => {
-    loadSession();
-  }, []);
+  useEffect(() => { loadSession(); }, []);
 
-  async function signIn(email: string, password: string) {
+  async function signIn(email: string, password: string): Promise<Destination> {
     const result = await login(email, password);
     await saveToken(result.access_token);
     const me = await getMe();
     setUser(me);
-    try {
-      const patientProfile = await getPatientProfile();
-      setProfile(patientProfile);
-      return "home";
-    } catch {
-      setProfile(null);
-      return "onboarding";
+    if (me.role === "patient") {
+      try { setProfile(await getPatientProfile()); return "home"; }
+      catch { setProfile(null); return "onboarding"; }
     }
+    if (me.role === "doctor" || me.role === "nurse") {
+      try { setProviderProfile(await getProviderProfile()); return "provider"; }
+      catch { setProviderProfile(null); return "providerSetup"; }
+    }
+    throw new Error("This account type is not available in the mobile application yet.");
   }
 
-  async function signUp(name: string, email: string, password: string) {
-    const result = await register(name, email, password);
+  async function signUp(name: string, email: string, password: string, role = "patient" as "patient" | "doctor" | "nurse") {
+    const result = await register(name, email, password, role);
     await saveToken(result.access_token);
-    setUser(await getMe());
-    setProfile(null);
+    const me = await getMe();
+    setUser(me);
+    if (role === "patient") { setProfile(null); return "onboarding"; }
+    setProviderProfile(null);
+    return "providerSetup";
   }
 
   async function finishOnboarding(payload: Parameters<typeof createPatientProfile>[0]) {
-    const created = await createPatientProfile(payload);
-    setProfile(created);
+    setProfile(await createPatientProfile(payload));
   }
 
   async function signOut() {
     await clearToken();
-    setUser(null);
-    setProfile(null);
+    setUser(null); setProfile(null); setProviderProfile(null);
   }
 
   async function refreshProfile() {
-    try {
-      setProfile(await getPatientProfile());
-    } catch {
-      setProfile(null);
+    if (user?.role === "patient") {
+      try { setProfile(await getPatientProfile()); } catch { setProfile(null); }
+    } else if (user?.role === "doctor" || user?.role === "nurse") {
+      try { setProviderProfile(await getProviderProfile()); } catch { setProviderProfile(null); }
     }
   }
 
-  return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, finishOnboarding, signOut, refreshProfile }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, profile, providerProfile, loading, signIn, signUp, finishOnboarding, signOut, refreshProfile }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
