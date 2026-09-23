@@ -141,3 +141,6 @@ export async function getProviderFollowUps() { return request<FollowUp[]>("/api/
 export async function completeProviderFollowUp(id: number) { return request<FollowUp>("/api/v1/providers/follow-ups/" + id + "/complete", { method: "PATCH" }); }
 export async function getProviderMessages(id: number) { return request<MessageItem[]>("/api/v1/providers/threads/" + id + "/messages"); }
 export async function sendProviderMessage(id: number, body: string) { return request<MessageItem>("/api/v1/providers/threads/" + id + "/messages", { method: "POST", body: JSON.stringify({ body }) }); }
+
+export type ProviderThread = { id: number; patient_id: number; provider_id: number; created_at: string; };
+export async function getProviderThreads() { return request<ProviderThread[]>("/api/v1/providers/threads"); }
