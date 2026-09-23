@@ -18,7 +18,7 @@ export default function LoginScreen({ navigation }: Props) {
     setBusy(true);
     try {
       const destination = await signIn(email.trim(), password);
-      navigation.reset({ index: 0, routes: [{ name: destination === "home" ? "Home" : "Onboarding" }] });
+      navigation.reset({ index: 0, routes: [{ name: destination === "home" ? "Home" : destination === "onboarding" ? "Onboarding" : destination === "providerSetup" ? "ProviderSetup" : "ProviderHome" }] });
     } catch (error) {
       Alert.alert("Login failed", error instanceof Error ? error.message : "Please try again.");
     } finally { setBusy(false); }
