@@ -53,10 +53,10 @@ export async function getPatientProfile() {
   return request<PatientProfile>("/api/v1/users/me/patient-profile");
 }
 
-export async function register(full_name: string, email: string, password: string) {
+export async function register(full_name: string, email: string, password: string, role: "patient" | "doctor" | "nurse" = "patient") {
   return request<{ access_token: string; token_type: string }>("/api/v1/auth/register", {
     method: "POST",
-    body: JSON.stringify({ full_name, email, password }),
+    body: JSON.stringify({ full_name, email, password, role }),
   });
 }
 
