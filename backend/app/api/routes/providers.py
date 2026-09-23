@@ -104,6 +104,26 @@ def update_appointment(appointment_id: int, data: dict, current_user: CurrentUse
     return appointment
 
 
+@router.get("/home-visits/available", response_model=list[HomeVisitResponse])
+def available_home_visits(current_user: CurrentUser, db: DB):
+    provider_only(current_user)
+    return list(db.scalars(select(HomeVisitRequest).where(HomeVisitRequest.provider_id.is_(None), HomeVisitRequest.status == HomeVisitStatus.REQUESTED).order_by(HomeVisitRequest.requested_at)).all())
+
+
+@router.post("/home-visits/{visit_id}/claim", response_model=HomeVisitResponse)
+def claim_home_visit(visit_id: int, current_user: CurrentUser, db: DB):
+    provider_only(current_user)
+    visit = db.scalar(select(HomeVisitRequest).where(HomeVisitRequest.id == visit_id, HomeVisitRequest.provider_id.is_(None), HomeVisitRequest.status == HomeVisitStatus.REQUESTED))
+    if not visit:
+        raise HTTPException(status_code=404, detail="Available home visit not found")
+    visit.provider_id = current_user.id
+    visit.status = HomeVisitStatus.ACCEPTED
+    db.add(Notification(user_id=visit.patient_id, title="Provider assigned", body=f"{current_user.full_name} accepted your home-care request."))
+    db.commit()
+    db.refresh(visit)
+    return visit
+
+
 @router.get("/home-visits", response_model=list[HomeVisitResponse])
 def home_visits(current_user: CurrentUser, db: DB):
     provider_only(current_user)
