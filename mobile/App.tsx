@@ -77,6 +77,7 @@ function AppNavigator() {
       <Stack.Screen name="ProviderSummaries" component={ProviderSummariesScreen}/>
       <Stack.Screen name="ProviderProfile" component={ProviderProfileScreen}/>
       <Stack.Screen name="ProviderMessages" component={ProviderMessagesScreen}/>
+      <Stack.Screen name="ProviderActivity" component={ProviderActivityScreen}/>
     </>}
   </Stack.Navigator>;
 }
