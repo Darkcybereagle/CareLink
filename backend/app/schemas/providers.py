@@ -54,3 +54,9 @@ class PatientSummary(BaseModel):
     summary: str
     clinician_handoff: str
     created_at: datetime
+
+
+class ProviderFollowUpCreate(BaseModel):
+    patient_id: int
+    scheduled_at: datetime
+    note: str = Field(min_length=3, max_length=2000)
