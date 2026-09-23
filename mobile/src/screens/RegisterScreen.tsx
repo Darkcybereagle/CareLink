@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
 import { useAuth } from "../auth/AuthContext";
@@ -12,14 +12,15 @@ export default function RegisterScreen({ navigation }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"patient" | "doctor" | "nurse">("patient");
   const [busy, setBusy] = useState(false);
 
   async function submit() {
     if (!name || !email || password.length < 8) return Alert.alert("CareLink", "Enter your name, email and a password of at least 8 characters.");
     setBusy(true);
     try {
-      await signUp(name.trim(), email.trim(), password);
-      navigation.reset({ index: 0, routes: [{ name: "Onboarding" }] });
+      const destination = await signUp(name.trim(), email.trim(), password, role);
+      navigation.reset({ index: 0, routes: [{ name: destination === "onboarding" ? "Onboarding" : destination === "providerSetup" ? "ProviderSetup" : "Home" }] });
     } catch (error) {
       Alert.alert("Registration failed", error instanceof Error ? error.message : "Please try again.");
     } finally { setBusy(false); }
@@ -30,7 +31,14 @@ export default function RegisterScreen({ navigation }: Props) {
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.wrap}>
         <Text style={styles.brand}>CareLink <Text style={styles.ai}>AI</Text></Text>
         <Text style={styles.title}>Create your account</Text>
-        <Text style={styles.subtitle}>A few details first. You can complete your patient profile next.</Text>
+        <Text style={styles.subtitle}>Choose how you will use CareLink. Provider accounts continue to professional onboarding.</Text>
+        <View style={styles.roles}>
+          {([["patient", "Patient"], ["doctor", "Doctor"], ["nurse", "Nurse"]] as const).map(([value, label]) => (
+            <Pressable key={value} onPress={() => setRole(value)} style={[styles.role, role === value && styles.roleSelected]}>
+              <Text style={[styles.roleText, role === value && styles.roleTextSelected]}>{label}</Text>
+            </Pressable>
+          ))}
+        </View>
         <TextInput style={styles.input} placeholder="Full name" value={name} onChangeText={setName} />
         <TextInput style={styles.input} placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
         <TextInput style={styles.input} placeholder="Password (8+ characters)" secureTextEntry value={password} onChangeText={setPassword} />
@@ -47,7 +55,12 @@ const styles = StyleSheet.create({
   brand: { fontSize: 22, fontWeight: "800", color: colors.text, marginBottom: spacing.xl },
   ai: { color: colors.primary },
   title: { fontSize: 30, fontWeight: "800", color: colors.text },
-  subtitle: { color: colors.muted, marginTop: spacing.sm, marginBottom: spacing.xl, lineHeight: 21 },
+  subtitle: { color: colors.muted, marginTop: spacing.sm, marginBottom: spacing.lg, lineHeight: 21 },
+  roles: { flexDirection: "row", gap: spacing.sm, marginBottom: spacing.md },
+  role: { flex: 1, borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surface, paddingVertical: 12, borderRadius: radius.md, alignItems: "center" },
+  roleSelected: { backgroundColor: colors.blueSoft, borderColor: colors.primary },
+  roleText: { color: colors.muted, fontWeight: "700" },
+  roleTextSelected: { color: colors.primaryDark },
   input: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.md, padding: 15, marginBottom: spacing.md, fontSize: 16 },
   primary: { backgroundColor: colors.primary, borderRadius: radius.pill, paddingVertical: 16, alignItems: "center", marginTop: spacing.sm },
   primaryText: { color: "#fff", fontWeight: "800", fontSize: 16 },
