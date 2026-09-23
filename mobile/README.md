@@ -58,6 +58,14 @@ Swagger:
 
     http://127.0.0.1:8000/docs
 
+## Patient and provider phases now included
+
+Patient: provider/hospital discovery, appointment requests, home-care requests, care activity, secure messaging and follow-up tracking.
+
+Provider: doctor/nurse onboarding, professional profile, verification state, availability, appointments, home-care claiming, AI patient summaries, secure messaging and follow-ups.
+
+Admin verification is intentionally not implemented yet.
+
 ## Product boundary
 
 Phase 3 and Phase 4 do not add provider matching, hospitals, appointments, chat, voice/video, payments, pharmacy, laboratory, ambulance or other later-phase modules. Those remain in the existing CareLink roadmap.
