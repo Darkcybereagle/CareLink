@@ -17,7 +17,7 @@ from app.schemas.care import (
 )
 from app.schemas.providers import (
     AvailabilityCreate, AvailabilityResponse, PatientSummary, ProviderProfileCreate,
-    ProviderProfileResponse,
+    ProviderProfileResponse, ProviderFollowUpCreate,
 )
 
 router = APIRouter(prefix="/providers", tags=["Providers"])
@@ -203,6 +203,20 @@ def provider_notifications(current_user: CurrentUser, db: DB):
 def provider_threads(current_user: CurrentUser, db: DB):
     provider_only(current_user)
     return list(db.scalars(select(MessageThread).where(MessageThread.provider_id == current_user.id).order_by(MessageThread.created_at.desc())).all())
+
+
+@router.post("/follow-ups", response_model=FollowUpResponse, status_code=201)
+def schedule_follow_up(data: ProviderFollowUpCreate, current_user: CurrentUser, db: DB):
+    provider_only(current_user)
+    patient = db.scalar(select(User).where(User.id == data.patient_id, User.role == UserRole.PATIENT))
+    if not patient:
+        raise HTTPException(status_code=404, detail="Patient not found")
+    row = FollowUp(patient_id=patient.id, provider_id=current_user.id, scheduled_at=data.scheduled_at, note=data.note)
+    db.add(row)
+    db.add(Notification(user_id=patient.id, title="Follow-up scheduled", body=f"{current_user.full_name} scheduled a follow-up for you."))
+    db.commit()
+    db.refresh(row)
+    return row
 
 
 @router.get("/follow-ups", response_model=list[FollowUpResponse])
