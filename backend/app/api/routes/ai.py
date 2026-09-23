@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
-from app.db.models import User
+from app.db.models import AIIntake, User
 from app.schemas.ai import AIIntakeRequest, AIIntakeResponse
 
 router = APIRouter(prefix="/ai", tags=["AI Assistant"])
@@ -34,7 +35,7 @@ URGENT_SIGNALS = (
 
 
 @router.post("/intake", response_model=AIIntakeResponse)
-def intake(data: AIIntakeRequest, current_user: User = Depends(get_current_user)) -> AIIntakeResponse:
+def intake(data: AIIntakeRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> AIIntakeResponse:
     text = data.symptoms.lower().strip()
 
     if any(signal in text for signal in EMERGENCY_SIGNALS):
@@ -67,6 +68,17 @@ def intake(data: AIIntakeRequest, current_user: User = Depends(get_current_user)
         f"Reported duration: {duration_text}. "
         "This is an intake summary for a qualified clinician, not a diagnosis."
     )
+
+    intake = AIIntake(
+        patient_id=current_user.id,
+        symptoms=data.symptoms.strip(),
+        duration=data.duration.strip() if data.duration else None,
+        urgency=urgency,
+        summary=summary,
+        clinician_handoff=clinician_handoff,
+    )
+    db.add(intake)
+    db.commit()
 
     return AIIntakeResponse(
         urgency=urgency,
