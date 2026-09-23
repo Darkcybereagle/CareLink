@@ -178,6 +178,13 @@ def provider_notifications(current_user: CurrentUser, db: DB):
     return list(db.scalars(select(Notification).where(Notification.user_id == current_user.id).order_by(Notification.created_at.desc())).all())
 
 
+
+@router.get("/threads", response_model=list[ProviderMessageThread])
+def provider_threads(current_user: CurrentUser, db: DB):
+    provider_only(current_user)
+    return list(db.scalars(select(MessageThread).where(MessageThread.provider_id == current_user.id).order_by(MessageThread.created_at.desc())).all())
+
+
 @router.get("/follow-ups", response_model=list[FollowUpResponse])
 def provider_follow_ups(current_user: CurrentUser, db: DB):
     provider_only(current_user)
