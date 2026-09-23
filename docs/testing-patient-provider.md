@@ -11,6 +11,14 @@ This is the verification checklist for the patient and provider phases added aft
 5. Confirm hospital cards show facility, address, city and services.
 6. Confirm no provider can be booked unless verified.
 
+## Local provider verification test
+
+The admin verification workflow is intentionally deferred. For local end-to-end testing only, after creating a provider profile you may mark that test provider verified directly in PostgreSQL:
+
+    UPDATE provider_profiles SET verification_status = 'VERIFIED' WHERE user_id = YOUR_PROVIDER_USER_ID;
+
+Do not use this as the production verification workflow. The future admin phase will own provider verification.
+
 ## Patient Phase 6 — Appointments and home care
 
 1. Use a verified provider.
