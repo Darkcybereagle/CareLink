@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.db.database import get_db
 from app.db.models import AIIntake, User
 from app.schemas.ai import AIIntakeRequest, AIIntakeResponse
 
