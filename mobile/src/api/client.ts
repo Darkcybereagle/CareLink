@@ -144,3 +144,6 @@ export async function sendProviderMessage(id: number, body: string) { return req
 
 export type ProviderThread = { id: number; patient_id: number; provider_id: number; created_at: string; };
 export async function getProviderThreads() { return request<ProviderThread[]>("/api/v1/providers/threads"); }
+
+export async function getAvailableProviderHomeVisits() { return request<HomeVisit[]>("/api/v1/providers/home-visits/available"); }
+export async function claimProviderHomeVisit(id: number) { return request<HomeVisit>("/api/v1/providers/home-visits/" + id + "/claim", { method: "POST" }); }
