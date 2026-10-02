@@ -55,6 +55,26 @@ export default function AIIntakeScreen({ navigation }: Props) {
             <Text style={styles.resultText}>{result.next_step}</Text>
             <Text style={styles.label}>Clinician handoff</Text>
             <Text style={styles.resultText}>{result.clinician_handoff}</Text>
+
+            {result.urgency === "emergency" ? (
+              <View style={styles.actions}>
+                <Pressable style={styles.emergencyButton} onPress={() => navigation.navigate("CareDirectory", { initialProviderType: "doctor" })}>
+                  <Text style={styles.primaryText}>Find urgent professional care</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.actions}>
+                <Pressable style={styles.primary} onPress={() => navigation.navigate("CareDirectory", { initialProviderType: "nurse" })}>
+                  <Text style={styles.primaryText}>Talk to a nurse</Text>
+                </Pressable>
+                <Pressable style={styles.secondary} onPress={() => navigation.navigate("CareDirectory", { initialProviderType: "doctor" })}>
+                  <Text style={styles.secondaryText}>Talk to a doctor</Text>
+                </Pressable>
+                <Pressable style={styles.secondary} onPress={() => navigation.navigate("HomeVisit")}>
+                  <Text style={styles.secondaryText}>Request home care</Text>
+                </Pressable>
+              </View>
+            )}
           </View>
         )}
       </ScrollView>
@@ -82,4 +102,8 @@ const styles = StyleSheet.create({
   danger: { backgroundColor: colors.dangerSoft, borderColor: "#F3B5B5" },
   resultTitle: { fontSize: 20, fontWeight: "800", color: colors.text },
   resultText: { color: colors.text, lineHeight: 22, marginTop: 4 },
+  actions: { marginTop: spacing.md },
+  secondary: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingVertical: 14, alignItems: "center", marginTop: spacing.sm },
+  secondaryText: { color: colors.primaryDark, fontWeight: "800" },
+  emergencyButton: { backgroundColor: "#B42318", borderRadius: radius.pill, paddingVertical: 16, alignItems: "center", marginTop: spacing.md },
 });
