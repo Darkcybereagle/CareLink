@@ -38,6 +38,14 @@ def test_patient_provider_end_to_end(client):
     assert providers.status_code == 200
     assert any(item["id"] == provider["id"] for item in providers.json())
 
+    nurses = client.get("/api/v1/care/providers?city=Abuja&provider_type=nurse", headers=patient_headers)
+    assert nurses.status_code == 200
+    assert any(item["id"] == provider["id"] and item["provider_type"] == "nurse" for item in nurses.json())
+
+    doctors = client.get("/api/v1/care/providers?city=Abuja&provider_type=doctor", headers=patient_headers)
+    assert doctors.status_code == 200
+    assert all(item["provider_type"] == "doctor" for item in doctors.json())
+
     scheduled = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
     appointment = client.post("/api/v1/care/appointments", headers=patient_headers, json={
         "provider_id": provider["id"], "scheduled_at": scheduled, "reason": "Follow-up assessment",
