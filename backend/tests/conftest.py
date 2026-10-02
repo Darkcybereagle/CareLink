@@ -41,7 +41,7 @@ def client():
 
 
 def auth_header(client: TestClient, role: str = "patient", email: str | None = None):
-    email = email or f"{role}@carelink.test"
+    email = email or f"{role}@carelink.example.com"
     response = client.post("/api/v1/auth/register", json={
         "full_name": f"Test {role.title()}",
         "email": email,
