@@ -38,7 +38,7 @@ export type RootStackParamList = {
   Onboarding: undefined;
   Home: undefined;
   AIIntake: undefined;
-  CareDirectory: undefined;
+  CareDirectory: { initialProviderType?: "doctor" | "nurse" } | undefined;
   Booking: { providerId: number; providerName: string };
   HomeVisit: undefined;
   Appointments: undefined;
