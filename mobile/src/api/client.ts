@@ -96,13 +96,13 @@ export async function submitAIIntake(symptoms: string, duration?: string) {
   });
 }
 
-export type ProviderCard = { id: number; full_name: string; provider_type: string; specialty: string | null; facility_name: string | null; city: string | null; verification_status: string; is_available: boolean; };
+export type ProviderCard = { id:number; full_name:string; provider_type:string; specialty:string|null; facility_name:string|null; city:string|null; verification_status:string; is_available:boolean; gender:string|null; age:number|null; professional_title:string|null; qualifications:string|null; languages:string|null; years_experience:number|null; offers_home_visits:boolean; consultation_modes:string|null; cases_completed:number; average_rating:number|null; review_count:number; };
 export type HospitalCard = { id: number; name: string; address: string; city: string; phone: string | null; services: string | null; };
 export type Appointment = { id: number; patient_id: number; provider_id: number; scheduled_at: string; reason: string; status: string; notes: string | null; };
 export type HomeVisit = { id: number; patient_id: number; provider_id: number | null; address: string; requested_at: string; reason: string; status: string; };
 export type NotificationItem = { id: number; title: string; body: string; is_read: boolean; created_at: string; };
 export type FollowUp = { id: number; patient_id: number; provider_id: number; scheduled_at: string; note: string; completed: boolean; };
-export type ProviderProfile = { id: number; user_id: number; provider_type: string; specialty: string | null; license_number: string | null; phone: string | null; facility_name: string | null; city: string | null; bio: string | null; verification_status: string; is_available: boolean; };
+export type ProviderProfile = { id:number; user_id:number; provider_type:string; specialty:string|null; license_number:string|null; phone:string|null; facility_name:string|null; city:string|null; bio:string|null; gender:string|null; date_of_birth:string|null; professional_title:string|null; qualifications:string|null; languages:string|null; years_experience:number|null; service_radius_km:number|null; offers_home_visits:boolean; consultation_modes:string|null; verification_status:string; is_available:boolean; };
 export type ProviderAvailability = { id: number; provider_id: number; day_of_week: number; start_time: string; end_time: string; };
 export type PatientSummary = { intake_id: number; patient_id: number; patient_name: string; symptoms: string; duration: string | null; urgency: string; summary: string; clinician_handoff: string; created_at: string; };
 export type MessageItem = { id: number; thread_id: number; sender_id: number; body: string; created_at: string; };
@@ -127,7 +127,7 @@ export async function markNotificationRead(id: number) { return request<Notifica
 export async function createFollowUp(provider_id: number, scheduled_at: string, note: string) { return request<FollowUp>("/api/v1/care/follow-ups", { method: "POST", body: JSON.stringify({ provider_id, scheduled_at, note }) }); }
 export async function getPatientFollowUps() { return request<FollowUp[]>("/api/v1/care/follow-ups"); }
 
-export async function createProviderProfile(payload: { provider_type: string; specialty?: string; license_number?: string; phone?: string; facility_name?: string; city?: string; bio?: string }) { return request<ProviderProfile>("/api/v1/providers/me/profile", { method: "POST", body: JSON.stringify(payload) }); }
+export async function createProviderProfile(payload: { provider_type:string; specialty?:string; license_number?:string; phone?:string; facility_name?:string; city?:string; bio?:string; gender?:string; date_of_birth?:string; professional_title?:string; qualifications?:string; languages?:string; years_experience?:number; service_radius_km?:number; offers_home_visits?:boolean; consultation_modes?:string }) { return request<ProviderProfile>("/api/v1/providers/me/profile", { method: "POST", body: JSON.stringify(payload) }); }
 export async function getProviderProfile() { return request<ProviderProfile>("/api/v1/providers/me"); }
 export async function addProviderAvailability(payload: { day_of_week: number; start_time: string; end_time: string }) { return request<ProviderAvailability>("/api/v1/providers/me/availability", { method: "POST", body: JSON.stringify(payload) }); }
 export async function getProviderAvailability() { return request<ProviderAvailability[]>("/api/v1/providers/me/availability"); }
@@ -147,3 +147,15 @@ export async function getProviderThreads() { return request<ProviderThread[]>("/
 
 export async function getAvailableProviderHomeVisits() { return request<HomeVisit[]>("/api/v1/providers/home-visits/available"); }
 export async function claimProviderHomeVisit(id: number) { return request<HomeVisit>("/api/v1/providers/home-visits/" + id + "/claim", { method: "POST" }); }
+
+export type ProviderQuality={provider_id:number;cases_completed:number;appointments_completed:number;home_visits_completed:number;average_rating:number|null;review_count:number;complaint_count:number;open_complaints:number;cancellation_count:number;no_show_reports:number;average_response_minutes:number|null};
+export type ProviderReview={id:number;patient_id:number;provider_id:number;appointment_id:number;rating:number;communication:number|null;punctuality:number|null;professionalism:number|null;respect:number|null;clarity:number|null;comment:string|null;created_at:string};
+export type NurseCareRecord={id:number;home_visit_id:number;nurse_id:number;patient_id:number;vitals:string|null;observations:string|null;interventions:string|null;escalation_required:boolean;escalation_note:string|null;created_at:string;updated_at:string};
+export async function getProviderQuality(id:number){return request<ProviderQuality>("/api/v1/quality/providers/"+id);}
+export async function getProviderReviews(id:number){return request<ProviderReview[]>("/api/v1/quality/providers/"+id+"/reviews");}
+export async function submitProviderReview(payload:{appointment_id:number;rating:number;communication?:number;punctuality?:number;professionalism?:number;respect?:number;clarity?:number;comment?:string}){return request<ProviderReview>("/api/v1/quality/reviews",{method:"POST",body:JSON.stringify(payload)});}
+export async function submitProviderComplaint(payload:{provider_id:number;appointment_id?:number;category:string;description:string}){return request("/api/v1/quality/complaints",{method:"POST",body:JSON.stringify(payload)});}
+export async function nurseCheckIn(id:number){return request("/api/v1/nurses/home-visits/"+id+"/check-in",{method:"POST"});}
+export async function saveNurseCareRecord(id:number,payload:{vitals?:string;observations?:string;interventions?:string;escalation_required:boolean;escalation_note?:string}){return request<NurseCareRecord>("/api/v1/nurses/home-visits/"+id+"/care-record",{method:"PUT",body:JSON.stringify(payload)});}
+export async function getNurseCareRecord(id:number){return request<NurseCareRecord>("/api/v1/nurses/home-visits/"+id+"/care-record");}
+export async function nurseCheckOut(id:number){return request("/api/v1/nurses/home-visits/"+id+"/check-out",{method:"POST"});}

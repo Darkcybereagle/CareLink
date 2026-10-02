@@ -5,6 +5,7 @@ Revises: 0002
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 revision = "0003"
 down_revision = "0002"
@@ -13,10 +14,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    user_role = sa.Enum("patient", "doctor", "nurse", "hospital", "admin", name="user_role")
-    verification_status = sa.Enum("pending", "verified", "rejected", name="verification_status")
-    appointment_status = sa.Enum("requested", "confirmed", "completed", "cancelled", name="appointment_status")
-    home_visit_status = sa.Enum("requested", "accepted", "completed", "cancelled", name="home_visit_status")
+    user_role = postgresql.ENUM("PATIENT", "DOCTOR", "NURSE", "HOSPITAL", "ADMIN", name="user_role", create_type=False)
+    verification_status = postgresql.ENUM("PENDING", "VERIFIED", "REJECTED", name="verification_status", create_type=False)
+    appointment_status = postgresql.ENUM("REQUESTED", "CONFIRMED", "COMPLETED", "CANCELLED", name="appointment_status", create_type=False)
+    home_visit_status = postgresql.ENUM("REQUESTED", "ACCEPTED", "COMPLETED", "CANCELLED", name="home_visit_status", create_type=False)
 
     bind = op.get_bind()
     user_role.create(bind, checkfirst=True)
@@ -35,7 +36,7 @@ def upgrade() -> None:
         sa.Column("facility_name", sa.String(160)),
         sa.Column("city", sa.String(80)),
         sa.Column("bio", sa.Text()),
-        sa.Column("verification_status", verification_status, nullable=False, server_default="pending"),
+        sa.Column("verification_status", verification_status, nullable=False, server_default="PENDING"),
         sa.Column("is_available", sa.Boolean(), nullable=False, server_default=sa.true()),
     )
     op.create_index("ix_provider_profiles_user_id", "provider_profiles", ["user_id"], unique=True)
@@ -69,7 +70,7 @@ def upgrade() -> None:
         sa.Column("provider_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False),
         sa.Column("scheduled_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("reason", sa.Text(), nullable=False),
-        sa.Column("status", appointment_status, nullable=False, server_default="requested"),
+        sa.Column("status", appointment_status, nullable=False, server_default="REQUESTED"),
         sa.Column("notes", sa.Text()),
     )
     op.create_index("ix_appointments_patient_id", "appointments", ["patient_id"])
@@ -152,6 +153,6 @@ def downgrade() -> None:
         op.drop_table(table)
 
     bind = op.get_bind()
-    sa.Enum(name="home_visit_status").drop(bind, checkfirst=True)
-    sa.Enum(name="appointment_status").drop(bind, checkfirst=True)
-    sa.Enum(name="verification_status").drop(bind, checkfirst=True)
+    postgresql.ENUM(name="home_visit_status").drop(bind, checkfirst=True)
+    postgresql.ENUM(name="appointment_status").drop(bind, checkfirst=True)
+    postgresql.ENUM(name="verification_status").drop(bind, checkfirst=True)

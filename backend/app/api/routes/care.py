@@ -1,14 +1,14 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
 from app.db.models import (
-    Appointment, AppointmentStatus, FollowUp, HomeVisitRequest, Hospital, Message,
-    MessageThread, Notification, ProviderProfile, User, UserRole, VerificationStatus,
+    Appointment, AppointmentStatus, FollowUp, HomeVisitRequest, HomeVisitStatus, Hospital, Message,
+    MessageThread, Notification, ProviderProfile, ProviderReview, User, UserRole, VerificationStatus,
 )
 from app.schemas.care import (
     AppointmentCreate, AppointmentResponse, FollowUpCreate, FollowUpResponse,
@@ -30,27 +30,34 @@ def patient_only(user: User) -> None:
 def discover_providers(current_user: CurrentUser, db: DB, city: str | None = None, specialty: str | None = None):
     patient_only(current_user)
     query = select(ProviderProfile, User).join(User, ProviderProfile.user_id == User.id).where(
-        User.is_active.is_(True), ProviderProfile.is_available.is_(True)
+        User.is_active.is_(True), ProviderProfile.is_available.is_(True),
+        ProviderProfile.verification_status == VerificationStatus.VERIFIED,
     )
     if city:
         query = query.where(ProviderProfile.city.ilike(f"%{city.strip()}%"))
     if specialty:
         query = query.where(ProviderProfile.specialty.ilike(f"%{specialty.strip()}%"))
     rows = db.execute(query).all()
-    return [
-        ProviderCard(
-            id=user.id,
-            full_name=user.full_name,
-            provider_type=profile.provider_type,
-            specialty=profile.specialty,
-            facility_name=profile.facility_name,
-            city=profile.city,
-            verification_status=profile.verification_status.value,
-            is_available=profile.is_available,
-        )
-        for profile, user in rows
-    ]
-
+    cards = []
+    today = __import__("datetime").date.today()
+    for profile, user in rows:
+        completed_a = db.scalar(select(func.count()).select_from(Appointment).where(Appointment.provider_id == user.id, Appointment.status == AppointmentStatus.COMPLETED)) or 0
+        completed_h = db.scalar(select(func.count()).select_from(HomeVisitRequest).where(HomeVisitRequest.provider_id == user.id, HomeVisitRequest.status == HomeVisitStatus.COMPLETED)) or 0
+        avg = db.scalar(select(func.avg(ProviderReview.rating)).where(ProviderReview.provider_id == user.id))
+        review_count = db.scalar(select(func.count()).select_from(ProviderReview).where(ProviderReview.provider_id == user.id)) or 0
+        age = None
+        if profile.date_of_birth:
+            age = today.year - profile.date_of_birth.year - ((today.month, today.day) < (profile.date_of_birth.month, profile.date_of_birth.day))
+        cards.append(ProviderCard(
+            id=user.id, full_name=user.full_name, provider_type=profile.provider_type, specialty=profile.specialty,
+            facility_name=profile.facility_name, city=profile.city, verification_status=profile.verification_status.value,
+            is_available=profile.is_available, gender=profile.gender, age=age, professional_title=profile.professional_title,
+            qualifications=profile.qualifications, languages=profile.languages, years_experience=profile.years_experience,
+            offers_home_visits=profile.offers_home_visits, consultation_modes=profile.consultation_modes,
+            cases_completed=completed_a + completed_h, average_rating=round(float(avg), 2) if avg is not None else None,
+            review_count=review_count,
+        ))
+    return cards
 
 @router.get("/hospitals", response_model=list[HospitalCard])
 def discover_hospitals(current_user: CurrentUser, db: DB, city: str | None = None):

@@ -37,8 +37,9 @@ export default function CareDirectoryScreen({ navigation }: Props) {
       <Text style={styles.name}>{p.full_name}</Text><Text style={styles.meta}>{p.provider_type} · {p.specialty || "General care"}</Text>
       <Text style={styles.meta}>{p.facility_name || "Independent provider"} · {p.city || "Location not set"}</Text>
       <Text style={styles.status}>{p.verification_status === "verified" ? "Verified provider" : "Verification pending"}</Text>
+      <Text style={styles.meta}>★ {p.average_rating ?? "New"} · {p.review_count} reviews · {p.cases_completed} completed cases</Text>
       <View style={styles.row}>
-        <Pressable style={styles.primarySmall} onPress={() => navigation.navigate("Booking", { providerId: p.id, providerName: p.full_name })}><Text style={styles.primaryText}>Request appointment</Text></Pressable>
+        <Pressable style={styles.primarySmall} onPress={() => navigation.navigate("ProviderDetails", { provider: p })}><Text style={styles.primaryText}>View profile</Text></Pressable>
         <Pressable style={styles.secondarySmall} onPress={() => navigation.navigate("Messages", { providerId: p.id, providerName: p.full_name })}><Text style={styles.secondaryText}>Message</Text></Pressable>
       </View>
     </View>)}
