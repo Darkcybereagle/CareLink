@@ -84,7 +84,7 @@ def upgrade() -> None:
         sa.Column("address", sa.String(255), nullable=False),
         sa.Column("requested_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("reason", sa.Text(), nullable=False),
-        sa.Column("status", home_visit_status, nullable=False, server_default="requested"),
+        sa.Column("status", home_visit_status, nullable=False, server_default="REQUESTED"),
     )
     op.create_index("ix_home_visit_requests_patient_id", "home_visit_requests", ["patient_id"])
     op.create_index("ix_home_visit_requests_provider_id", "home_visit_requests", ["provider_id"])

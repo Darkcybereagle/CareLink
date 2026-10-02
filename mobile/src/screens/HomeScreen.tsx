@@ -4,47 +4,6 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
 import { useAuth } from "../auth/AuthContext";
 import { colors, radius, spacing } from "../theme";
-
-type Props = NativeStackScreenProps<RootStackParamList, "Home">;
-
-export default function HomeScreen({ navigation }: Props) {
-  const { user, profile, signOut } = useAuth();
-  const firstName = user?.full_name.split(" ")[0] || "there";
-
-  return (
-    <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.brand}>CareLink <Text style={styles.ai}>AI</Text></Text>
-            <Text style={styles.greeting}>Good morning, {firstName} 👋</Text>
-          </View>
-          <Pressable onPress={signOut}><Text style={styles.signOut}>Sign out</Text></Pressable>
-        </View>
-
-        <View style={styles.hero}>
-          <Text style={styles.heroTitle}>How are you feeling today?</Text>
-          <Text style={styles.heroText}>Talk to CareLink about what you're experiencing. We'll help organize the next step.</Text>
-          <Pressable style={styles.primary} onPress={() => navigation.navigate("AIIntake")}>
-            <Text style={styles.primaryText}>Talk to CareLink</Text>
-          </Pressable>
-        </View>
-
-        <Text style={styles.sectionTitle}>Care options</Text>
-        <Pressable style={styles.action} onPress={() => navigation.navigate("CareDirectory")}>
-          <Text style={styles.actionTitle}>Find a doctor or hospital</Text>
-          <Text style={styles.actionText}>Discover care options near you.</Text>
-        </Pressable>
-        <View style={styles.grid}>
-          <Pressable style={styles.option} onPress={() => navigation.navigate("HomeVisit")}>
-            <Text style={styles.icon}>⌂</Text><Text style={styles.optionTitle}>Request home care</Text><Text style={styles.optionText}>Ask for professional care at home.</Text>
-          </Pressable>
-          <Pressable style={styles.option} onPress={() => navigation.navigate("Appointments")}>
-            <Text style={styles.icon}>◷</Text><Text style={styles.optionTitle}>Appointments</Text><Text style={styles.optionText}>View your appointment requests.</Text>
-          </Pressable>
-          <Pressable style={styles.option} onPress={() => navigation.navigate("Activity")}>
-            <Text style={styles.icon}>●</Text><Text style={styles.optionTitle}>Care activity</Text><Text style={styles.optionText}>Notifications, home visits and follow-ups.</Text>
-          </Pressable>
-        </View>
-
-
+type Props=NativeStackScreenProps<RootStackParamList,"Home">;
+export default function HomeScreen({navigation}:Props){const{user,signOut}=useAuth();const firstName=user?.full_name.split(" ")[0]||"there";return <SafeAreaView style={styles.safe}><ScrollView contentContainerStyle={styles.content}><View style={styles.header}><View><Text style={styles.brand}>CareLink <Text style={styles.ai}>AI</Text></Text><Text style={styles.greeting}>Good morning, {firstName} 👋</Text></View><Pressable onPress={signOut}><Text style={styles.signOut}>Sign out</Text></Pressable></View><View style={styles.hero}><Text style={styles.heroTitle}>How are you feeling today?</Text><Text style={styles.heroText}>Talk to CareLink about what you're experiencing. We'll help organize the next step.</Text><Pressable style={styles.primary}onPress={()=>navigation.navigate("AIIntake")}><Text style={styles.primaryText}>Talk to CareLink</Text></Pressable></View><Text style={styles.sectionTitle}>Care options</Text><Pressable style={styles.action}onPress={()=>navigation.navigate("CareDirectory")}><Text style={styles.actionTitle}>Find a doctor or hospital</Text><Text style={styles.actionText}>Discover verified care options and provider quality information.</Text></Pressable><View style={styles.grid}><Pressable style={styles.option}onPress={()=>navigation.navigate("HomeVisit")}><Text style={styles.icon}>⌂</Text><Text style={styles.optionTitle}>Request home care</Text><Text style={styles.optionText}>Ask for professional care at home.</Text></Pressable><Pressable style={styles.option}onPress={()=>navigation.navigate("Appointments")}><Text style={styles.icon}>◷</Text><Text style={styles.optionTitle}>Appointments</Text><Text style={styles.optionText}>View requests, reviews and service issues.</Text></Pressable><Pressable style={styles.option}onPress={()=>navigation.navigate("Activity")}><Text style={styles.icon}>●</Text><Text style={styles.optionTitle}>Care activity</Text><Text style={styles.optionText}>Notifications, home visits and follow-ups.</Text></Pressable></View></ScrollView></SafeAreaView>}
+const styles=StyleSheet.create({safe:{flex:1,backgroundColor:colors.background},content:{padding:spacing.lg},header:{flexDirection:"row",justifyContent:"space-between",alignItems:"center"},brand:{fontSize:21,fontWeight:"800",color:colors.text},ai:{color:colors.primary},greeting:{fontSize:18,fontWeight:"700",color:colors.text,marginTop:6},signOut:{color:colors.primaryDark,fontWeight:"700"},hero:{backgroundColor:colors.blueSoft,borderRadius:radius.lg,padding:spacing.lg,marginTop:spacing.xl},heroTitle:{fontSize:25,fontWeight:"800",color:colors.text},heroText:{color:colors.muted,lineHeight:21,marginTop:spacing.sm},primary:{backgroundColor:colors.primary,borderRadius:radius.pill,paddingVertical:14,alignItems:"center",marginTop:spacing.lg},primaryText:{color:"#fff",fontWeight:"800"},sectionTitle:{fontSize:20,fontWeight:"800",color:colors.text,marginTop:spacing.xl,marginBottom:spacing.md},action:{backgroundColor:colors.surface,borderWidth:1,borderColor:colors.border,borderRadius:radius.lg,padding:spacing.md},actionTitle:{fontWeight:"800",fontSize:17,color:colors.text},actionText:{color:colors.muted,marginTop:5},grid:{gap:spacing.sm,marginTop:spacing.sm},option:{backgroundColor:colors.surface,borderWidth:1,borderColor:colors.border,borderRadius:radius.lg,padding:spacing.md},icon:{fontSize:22,color:colors.primaryDark},optionTitle:{fontWeight:"800",color:colors.text,marginTop:6},optionText:{color:colors.muted,marginTop:4}});
