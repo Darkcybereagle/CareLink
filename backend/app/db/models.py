@@ -55,6 +55,7 @@ class ProviderProfile(Base):
     gender: Mapped[str|None]=mapped_column(String(30))
     date_of_birth: Mapped[date|None]=mapped_column(Date)
     professional_title: Mapped[str|None]=mapped_column(String(120))
+    photo_url: Mapped[str|None]=mapped_column(String(500))
     qualifications: Mapped[str|None]=mapped_column(Text)
     languages: Mapped[str|None]=mapped_column(String(255))
     years_experience: Mapped[int|None]=mapped_column(Integer)

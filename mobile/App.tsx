@@ -28,6 +28,7 @@ import ProviderActivityScreen from "./src/screens/ProviderActivityScreen";
 import ProviderDetailsScreen from "./src/screens/ProviderDetailsScreen";
 import ReviewProviderScreen from "./src/screens/ReviewProviderScreen";
 import NurseCareScreen from "./src/screens/NurseCareScreen";
+import ReportServiceIssueScreen from "./src/screens/ReportServiceIssueScreen";
 import { ProviderCard } from "./src/api/client";
 
 export type RootStackParamList = {
@@ -54,6 +55,7 @@ export type RootStackParamList = {
   ProviderDetails: { provider: ProviderCard };
   ReviewProvider: { appointmentId: number; providerId: number };
   NurseCare: { visitId: number };
+  ReportServiceIssue: { appointmentId: number; providerId: number };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -79,6 +81,7 @@ function AppNavigator() {
       <Stack.Screen name="Messages" component={MessagesScreen}/>
       <Stack.Screen name="ProviderDetails" component={ProviderDetailsScreen}/>
       <Stack.Screen name="ReviewProvider" component={ReviewProviderScreen}/>
+      <Stack.Screen name="ReportServiceIssue" component={ReportServiceIssueScreen}/>
     </> : !providerProfile ? <Stack.Screen name="ProviderSetup" component={ProviderSetupScreen}/> : <>
       <Stack.Screen name="ProviderHome" component={ProviderHomeScreen}/>
       <Stack.Screen name="ProviderAppointments" component={ProviderAppointmentsScreen}/>

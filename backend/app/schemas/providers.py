@@ -12,6 +12,7 @@ class ProviderProfileCreate(BaseModel):
     gender:str|None=Field(default=None,max_length=30)
     date_of_birth:date|None=None
     professional_title:str|None=Field(default=None,max_length=120)
+    photo_url:str|None=Field(default=None,max_length=500)
     qualifications:str|None=Field(default=None,max_length=3000)
     languages:str|None=Field(default=None,max_length=255)
     years_experience:int|None=Field(default=None,ge=0,le=80)

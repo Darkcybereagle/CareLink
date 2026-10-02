@@ -51,7 +51,7 @@ def discover_providers(current_user: CurrentUser, db: DB, city: str | None = Non
         cards.append(ProviderCard(
             id=user.id, full_name=user.full_name, provider_type=profile.provider_type, specialty=profile.specialty,
             facility_name=profile.facility_name, city=profile.city, verification_status=profile.verification_status.value,
-            is_available=profile.is_available, gender=profile.gender, age=age, professional_title=profile.professional_title,
+            is_available=profile.is_available, gender=profile.gender, age=age, professional_title=profile.professional_title, photo_url=profile.photo_url,
             qualifications=profile.qualifications, languages=profile.languages, years_experience=profile.years_experience,
             offers_home_visits=profile.offers_home_visits, consultation_modes=profile.consultation_modes,
             cases_completed=completed_a + completed_h, average_rating=round(float(avg), 2) if avg is not None else None,

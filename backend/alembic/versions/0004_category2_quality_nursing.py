@@ -20,7 +20,7 @@ def upgrade():
     visit_check.create(bind,checkfirst=True); complaint.create(bind,checkfirst=True)
 
     for name,typ in [
-        ("gender",sa.String(30)),("date_of_birth",sa.Date()),("professional_title",sa.String(120)),
+        ("gender",sa.String(30)),("date_of_birth",sa.Date()),("professional_title",sa.String(120)),("photo_url",sa.String(500)),
         ("qualifications",sa.Text()),("languages",sa.String(255)),("years_experience",sa.Integer()),
         ("service_radius_km",sa.Integer()),("consultation_modes",sa.String(120))
     ]: op.add_column("provider_profiles",sa.Column(name,typ,nullable=True))
@@ -69,7 +69,7 @@ def downgrade():
     for table in ("nurse_care_records","provider_complaints","provider_reviews"): op.drop_table(table)
     op.drop_constraint("uq_message_thread_participants","message_threads",type_="unique")
     for c in ("escalation_note","observations","care_notes","checked_out_at","checked_in_at","check_status"): op.drop_column("home_visit_requests",c)
-    for c in ("offers_home_visits","consultation_modes","service_radius_km","years_experience","languages","qualifications","professional_title","date_of_birth","gender"): op.drop_column("provider_profiles",c)
+    for c in ("offers_home_visits","consultation_modes","service_radius_km","years_experience","languages","qualifications","photo_url","professional_title","date_of_birth","gender"): op.drop_column("provider_profiles",c)
     bind=op.get_bind()
     postgresql.ENUM(name="complaint_status").drop(bind,checkfirst=True)
     postgresql.ENUM(name="visit_check_status").drop(bind,checkfirst=True)

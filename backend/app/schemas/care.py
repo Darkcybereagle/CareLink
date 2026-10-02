@@ -2,7 +2,7 @@ from datetime import date, datetime
 from pydantic import BaseModel, ConfigDict, Field
 class ProviderCard(BaseModel):
     id:int; full_name:str; provider_type:str; specialty:str|None; facility_name:str|None; city:str|None
-    verification_status:str; is_available:bool; gender:str|None=None; age:int|None=None; professional_title:str|None=None
+    verification_status:str; is_available:bool; gender:str|None=None; age:int|None=None; professional_title:str|None=None; photo_url:str|None=None
     qualifications:str|None=None; languages:str|None=None; years_experience:int|None=None; offers_home_visits:bool=False
     consultation_modes:str|None=None; cases_completed:int=0; average_rating:float|None=None; review_count:int=0
 class HospitalCard(BaseModel):
