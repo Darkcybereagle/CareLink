@@ -1,44 +1,33 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
-from app.db.models import AIIntake, User
+from app.db.models import AIIntake, User, UserRole
 from app.schemas.ai import AIIntakeRequest, AIIntakeResponse
 
 router = APIRouter(prefix="/ai", tags=["AI Assistant"])
 
 EMERGENCY_SIGNALS = (
-    "chest pain",
-    "difficulty breathing",
-    "can't breathe",
-    "cannot breathe",
-    "severe bleeding",
-    "unconscious",
-    "not breathing",
-    "seizure",
-    "convulsion",
-    "stroke",
-    "face drooping",
-    "slurred speech",
-    "sudden weakness",
+    "chest pain", "difficulty breathing", "can't breathe", "cannot breathe",
+    "severe bleeding", "serious bleeding", "uncontrolled bleeding",
+    "bleeding won't stop", "bleeding will not stop", "vomiting blood",
+    "coughing blood", "unconscious", "not breathing", "seizure", "convulsion",
+    "stroke", "face drooping", "slurred speech", "sudden weakness",
 )
 
 URGENT_SIGNALS = (
-    "severe pain",
-    "high fever",
-    "persistent vomiting",
-    "fainting",
-    "confusion",
-    "dehydration",
-    "heavy bleeding",
+    "severe pain", "high fever", "persistent vomiting", "fainting", "confusion",
+    "dehydration", "heavy bleeding", "nose bleed", "nosebleed", "bleeding from the nose",
 )
 
 
 @router.post("/intake", response_model=AIIntakeResponse)
 def intake(data: AIIntakeRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> AIIntakeResponse:
-    text = data.symptoms.lower().strip()
+    if current_user.role != UserRole.PATIENT:
+        raise HTTPException(status_code=403, detail="Patient access required")
 
+    text = data.symptoms.lower().strip()
     if any(signal in text for signal in EMERGENCY_SIGNALS):
         urgency = "emergency"
         safety_message = (
@@ -46,7 +35,7 @@ def intake(data: AIIntakeRequest, current_user: User = Depends(get_current_user)
             "Please seek urgent emergency medical care now or contact your local emergency service. "
             "Do not rely on this AI response as a diagnosis."
         )
-        next_step = "Emergency professional assessment now."
+        next_step = "Seek emergency professional assessment now."
     elif any(signal in text for signal in URGENT_SIGNALS):
         urgency = "urgent"
         safety_message = (
@@ -60,7 +49,7 @@ def intake(data: AIIntakeRequest, current_user: User = Depends(get_current_user)
             "No configured emergency signal was detected from this short intake. "
             "This does not rule out a serious condition."
         )
-        next_step = "Continue with CareLink's normal care-routing flow and professional review as needed."
+        next_step = "Continue to a CareLink nurse, doctor, or facility for professional review as needed."
 
     duration_text = data.duration.strip() if data.duration else "duration not provided"
     summary = f"Patient-reported concern: {data.symptoms.strip()}. Duration: {duration_text}."
