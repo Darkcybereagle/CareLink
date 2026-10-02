@@ -1,10 +1,12 @@
 {
   "name": "carelink-mobile",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "private": true,
   "main": "expo/AppEntry.js",
   "scripts": {
     "start": "expo start",
+    "patient": "cross-env EXPO_PUBLIC_APP_ROLE=patient expo start --port 8081",
+    "provider": "cross-env EXPO_PUBLIC_APP_ROLE=provider expo start --port 8082",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.2.0",
+    "cross-env": "^7.0.3",
     "typescript": "~5.9.0"
   }
 }

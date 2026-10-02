@@ -17,7 +17,7 @@ from app.schemas.care import (
 )
 from app.schemas.providers import (
     AvailabilityCreate, AvailabilityResponse, PatientSummary, ProviderProfileCreate,
-    ProviderProfileResponse, ProviderFollowUpCreate,
+    ProviderProfileResponse, ProviderFollowUpCreate, ProviderMessageThread,
 )
 
 router = APIRouter(prefix="/providers", tags=["Providers"])
@@ -70,6 +70,8 @@ def update_profile(data: ProviderProfileCreate, current_user: CurrentUser, db: D
 @router.post("/me/availability", response_model=AvailabilityResponse, status_code=201)
 def add_availability(data: AvailabilityCreate, current_user: CurrentUser, db: DB):
     provider_only(current_user)
+    if data.start_time >= data.end_time:
+        raise HTTPException(status_code=400, detail="Availability end time must be after start time")
     row = ProviderAvailability(provider_id=current_user.id, **data.model_dump())
     db.add(row)
     db.commit()

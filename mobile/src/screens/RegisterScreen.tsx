@@ -3,6 +3,7 @@ import { Alert, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, StyleSh
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
 import { useAuth } from "../auth/AuthContext";
+import { IS_PROVIDER_APP } from "../config";
 import { colors, radius, spacing } from "../theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "Register">;
@@ -12,7 +13,7 @@ export default function RegisterScreen({ navigation }: Props) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"patient" | "doctor" | "nurse">("patient");
+  const [role, setRole] = useState<"patient" | "doctor" | "nurse">(IS_PROVIDER_APP ? "nurse" : "patient");
   const [busy, setBusy] = useState(false);
 
   async function submit() {
@@ -30,15 +31,15 @@ export default function RegisterScreen({ navigation }: Props) {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.wrap}>
         <Text style={styles.brand}>CareLink <Text style={styles.ai}>AI</Text></Text>
-        <Text style={styles.title}>Create your account</Text>
-        <Text style={styles.subtitle}>Choose how you will use CareLink. Provider accounts continue to professional onboarding.</Text>
-        <View style={styles.roles}>
-          {([["patient", "Patient"], ["doctor", "Doctor"], ["nurse", "Nurse"]] as const).map(([value, label]) => (
+        <Text style={styles.title}>{IS_PROVIDER_APP ? "Create provider account" : "Create your account"}</Text>
+        <Text style={styles.subtitle}>{IS_PROVIDER_APP ? "Professional onboarding for doctors and nurses." : "Create your patient account to access CareLink services."}</Text>
+        {IS_PROVIDER_APP && <View style={styles.roles}>
+          {([["doctor", "Doctor"], ["nurse", "Nurse"]] as const).map(([value, label]) => (
             <Pressable key={value} onPress={() => setRole(value)} style={[styles.role, role === value && styles.roleSelected]}>
               <Text style={[styles.roleText, role === value && styles.roleTextSelected]}>{label}</Text>
             </Pressable>
           ))}
-        </View>
+        </View>}
         <TextInput style={styles.input} placeholder="Full name" value={name} onChangeText={setName} />
         <TextInput style={styles.input} placeholder="Email" autoCapitalize="none" keyboardType="email-address" value={email} onChangeText={setEmail} />
         <TextInput style={styles.input} placeholder="Password (8+ characters)" secureTextEntry value={password} onChangeText={setPassword} />

@@ -1,24 +1,26 @@
 from fastapi import FastAPI
+from sqlalchemy import text
 
 from app.api.routes.ai import router as ai_router
+from app.api.routes.auth import router as auth_router
 from app.api.routes.care import router as care_router
 from app.api.routes.providers import router as providers_router
-from app.api.routes.auth import router as auth_router
 from app.api.routes.users import router as users_router
+from app.db.database import engine
 
-app = FastAPI(
-    title="CareLink AI API",
-    description="Secure healthcare access and care coordination API.",
-    version="0.6.0",
-)
+app = FastAPI(title="CareLink AI API", description="Secure healthcare access and care coordination API.", version="1.0.0")
 
-app.include_router(auth_router, prefix="/api/v1")
-app.include_router(users_router, prefix="/api/v1")
-app.include_router(ai_router, prefix="/api/v1")
-app.include_router(care_router, prefix="/api/v1")
-app.include_router(providers_router, prefix="/api/v1")
+for router in (auth_router, users_router, ai_router, care_router, providers_router):
+    app.include_router(router, prefix="/api/v1")
 
 
 @app.get("/health", tags=["System"])
 def health_check() -> dict[str, str]:
     return {"status": "ok", "service": "carelink-api"}
+
+
+@app.get("/ready", tags=["System"])
+def readiness_check() -> dict[str, str]:
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+    return {"status": "ready", "database": "ok"}

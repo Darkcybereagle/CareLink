@@ -1,43 +1,22 @@
 # CareLink Architecture
 
-## Core Flow
+## Category 1 baseline
+CareLink is a modular healthcare platform. Patient and provider experiences share one API and one PostgreSQL source of truth, but run as separate Expo development clients/QR sessions.
 
-Mobile/Web clients -> FastAPI -> PostgreSQL / Redis / AI / external services.
+## Runtime
+Patient app / Provider app / Web -> FastAPI API -> PostgreSQL.
 
-Clients never connect directly to PostgreSQL or an LLM provider.
+Later categories add stable adapters for Redis, queues/workers, WebSockets, AI/model registry, voice, maps, notifications, payments, licence/facility verification, object storage and external clinical systems. Clients never connect directly to PostgreSQL, external verification systems or an LLM.
 
-## Applications
+## API domains
+Implemented now: /auth, /users, /ai, /care, /providers.
 
-- Mobile: React Native + Expo + TypeScript
-- Web: Next.js + TypeScript
-- API: FastAPI + Python
-- Database: PostgreSQL
-- Cache/queues: Redis
-- Offline local storage: SQLite
-- Realtime: WebSockets
+Reserved domain boundaries for subsequent categories: /patients, /nurses, /doctors, /hospitals, /verification, /appointments, /home-visits, /availability, /matching, /messages, /notifications, /reviews, /quality, /medical-records, /documents, /consent, /audit, /location, /emergency, /voice, /payments, /integrations.
 
-## API Modules
+A reserved boundary is never presented as a live integration until its implementation and tests exist.
 
-- /api/v1/auth
-- /api/v1/users
-- /api/v1/patients
-- /api/v1/providers
-- /api/v1/hospitals
-- /api/v1/appointments
-- /api/v1/home-visits
-- /api/v1/ai
-- /api/v1/voice
-- /api/v1/messages
-- /api/v1/notifications
-- /api/v1/payments
-- /api/v1/medical-records
+## Quality gates
+Every backend change must pass Alembic upgrade on PostgreSQL and pytest -q. Every mobile change must pass npm run typecheck. GitHub Actions enforces backend tests, PostgreSQL migrations and TypeScript checking.
 
 ## Safety
-
-AI supports intake, education, routing and clinician handoff. It must not present itself as a replacement for qualified clinical care. Red-flag safety checks must take priority over ordinary conversational flows.
-
-## Phase 4 implementation
-
-The first AI slice is intentionally deterministic and server-side. It accepts patient-reported symptoms, checks configured safety signals, creates a structured intake summary and returns a care-routing step. It does not diagnose or prescribe.
-
-A later AI provider can be connected behind this same API boundary without changing the mobile client contract.
+AI supports intake, education, routing and clinician handoff. Emergency/red-flag rules take priority. Production learning must use consented, de-identified data and an evaluated/approved model lifecycle; live patient conversations do not directly retrain the deployed model.
