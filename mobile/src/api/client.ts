@@ -107,10 +107,11 @@ export type ProviderAvailability = { id: number; provider_id: number; day_of_wee
 export type PatientSummary = { intake_id: number; patient_id: number; patient_name: string; symptoms: string; duration: string | null; urgency: string; summary: string; clinician_handoff: string; created_at: string; };
 export type MessageItem = { id: number; thread_id: number; sender_id: number; body: string; created_at: string; };
 
-export async function discoverProviders(city?: string, specialty?: string) {
+export async function discoverProviders(city?: string, specialty?: string, providerType?: "doctor" | "nurse") {
   const params = new URLSearchParams();
   if (city) params.set("city", city);
   if (specialty) params.set("specialty", specialty);
+  if (providerType) params.set("provider_type", providerType);
   const query = params.toString();
   return request<ProviderCard[]>(query ? "/api/v1/care/providers?" + query : "/api/v1/care/providers");
 }
