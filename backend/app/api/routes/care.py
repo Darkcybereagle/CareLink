@@ -27,7 +27,7 @@ def patient_only(user: User) -> None:
 
 
 @router.get("/providers", response_model=list[ProviderCard])
-def discover_providers(current_user: CurrentUser, db: DB, city: str | None = None, specialty: str | None = None):
+def discover_providers(current_user: CurrentUser, db: DB, city: str | None = None, specialty: str | None = None, provider_type: str | None = None):
     patient_only(current_user)
     query = select(ProviderProfile, User).join(User, ProviderProfile.user_id == User.id).where(
         User.is_active.is_(True), ProviderProfile.is_available.is_(True),
