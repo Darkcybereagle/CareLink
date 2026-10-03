@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
@@ -42,7 +43,11 @@ def discover_providers(current_user: CurrentUser, db: DB, city: str | None = Non
         if normalized_type not in {UserRole.DOCTOR.value, UserRole.NURSE.value}:
             raise HTTPException(status_code=400, detail="Provider type must be doctor or nurse")
         query = query.where(ProviderProfile.provider_type == normalized_type)
-    rows = db.execute(query).all()
+    try:
+        rows = db.execute(query).all()
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Care directory is temporarily unavailable. Please try again.")
     cards = []
     today = __import__("datetime").date.today()
     for profile, user in rows:
