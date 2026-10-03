@@ -3,7 +3,7 @@ from sqlalchemy import select
 from app.db.models import Appointment, AppointmentStatus, HomeVisitRequest, HomeVisitStatus, ProviderProfile, User, VerificationStatus
 from conftest import TestingSessionLocal, auth_header
 
-def make_verified_provider(client,role="nurse",email="quality-nurse@carelink.test"):
+def make_verified_provider(client,role="nurse",email="quality-nurse@carelink.example.com"):
     headers=auth_header(client,role,email)
     user=client.get("/api/v1/users/me",headers=headers).json()
     response=client.post("/api/v1/providers/me/profile",headers=headers,json={
@@ -19,7 +19,7 @@ def make_verified_provider(client,role="nurse",email="quality-nurse@carelink.tes
     return headers,user
 
 def test_verified_review_and_quality(client):
-    patient=auth_header(client,"patient","quality-patient@carelink.test")
+    patient=auth_header(client,"patient","quality-patient@carelink.example.com")
     provider,user=make_verified_provider(client)
     scheduled=(datetime.now(timezone.utc)+timedelta(hours=2)).isoformat()
     ap=client.post("/api/v1/care/appointments",headers=patient,json={"provider_id":user["id"],"scheduled_at":scheduled,"reason":"Care review test"})
@@ -37,8 +37,8 @@ def test_verified_review_and_quality(client):
     assert q.json()["cases_completed"]==1
 
 def test_nurse_checkin_record_checkout(client):
-    patient=auth_header(client,"patient","visit-patient@carelink.test")
-    nurse,user=make_verified_provider(client,"nurse","visit-nurse@carelink.test")
+    patient=auth_header(client,"patient","visit-patient@carelink.example.com")
+    nurse,user=make_verified_provider(client,"nurse","visit-nurse@carelink.example.com")
     visit=client.post("/api/v1/care/home-visits",headers=patient,json={"provider_id":user["id"],"address":"Central Area, Abuja","reason":"Home nursing follow-up"})
     assert visit.status_code==201,visit.text
     visit_id=visit.json()["id"]

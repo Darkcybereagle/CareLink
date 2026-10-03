@@ -7,7 +7,7 @@ from conftest import TestingSessionLocal, auth_header
 
 
 def test_patient_provider_end_to_end(client):
-    patient_headers = auth_header(client, "patient", "patient-flow@carelink.test")
+    patient_headers = auth_header(client, "patient", "patient-flow@carelink.example.com")
     profile = client.post("/api/v1/users/me/patient-profile", headers=patient_headers, json={
         "phone": "+2348000000000", "gender": "unspecified", "address": "Abuja, Nigeria",
     })
@@ -19,7 +19,7 @@ def test_patient_provider_end_to_end(client):
     assert intake.status_code == 200, intake.text
     assert intake.json()["urgency"] == "routine"
 
-    provider_headers = auth_header(client, "nurse", "nurse-flow@carelink.test")
+    provider_headers = auth_header(client, "nurse", "nurse-flow@carelink.example.com")
     provider = client.get("/api/v1/users/me", headers=provider_headers).json()
     created = client.post("/api/v1/providers/me/profile", headers=provider_headers, json={
         "provider_type": "nurse", "specialty": "Community health",
@@ -37,6 +37,14 @@ def test_patient_provider_end_to_end(client):
     providers = client.get("/api/v1/care/providers?city=Abuja", headers=patient_headers)
     assert providers.status_code == 200
     assert any(item["id"] == provider["id"] for item in providers.json())
+
+    nurses = client.get("/api/v1/care/providers?city=Abuja&provider_type=nurse", headers=patient_headers)
+    assert nurses.status_code == 200
+    assert any(item["id"] == provider["id"] and item["provider_type"] == "nurse" for item in nurses.json())
+
+    doctors = client.get("/api/v1/care/providers?city=Abuja&provider_type=doctor", headers=patient_headers)
+    assert doctors.status_code == 200
+    assert all(item["provider_type"] == "doctor" for item in doctors.json())
 
     scheduled = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
     appointment = client.post("/api/v1/care/appointments", headers=patient_headers, json={
@@ -66,7 +74,7 @@ def test_patient_provider_end_to_end(client):
 
 
 def test_provider_availability_validation(client):
-    headers = auth_header(client, "doctor", "doctor-availability@carelink.test")
+    headers = auth_header(client, "doctor", "doctor-availability@carelink.example.com")
     response = client.post("/api/v1/providers/me/availability", headers=headers, json={
         "day_of_week": 1, "start_time": "17:00:00", "end_time": "09:00:00",
     })

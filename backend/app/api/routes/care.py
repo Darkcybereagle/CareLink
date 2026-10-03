@@ -27,7 +27,7 @@ def patient_only(user: User) -> None:
 
 
 @router.get("/providers", response_model=list[ProviderCard])
-def discover_providers(current_user: CurrentUser, db: DB, city: str | None = None, specialty: str | None = None):
+def discover_providers(current_user: CurrentUser, db: DB, city: str | None = None, specialty: str | None = None, provider_type: str | None = None):
     patient_only(current_user)
     query = select(ProviderProfile, User).join(User, ProviderProfile.user_id == User.id).where(
         User.is_active.is_(True), ProviderProfile.is_available.is_(True),
@@ -37,6 +37,11 @@ def discover_providers(current_user: CurrentUser, db: DB, city: str | None = Non
         query = query.where(ProviderProfile.city.ilike(f"%{city.strip()}%"))
     if specialty:
         query = query.where(ProviderProfile.specialty.ilike(f"%{specialty.strip()}%"))
+    if provider_type:
+        normalized_type = provider_type.strip().lower()
+        if normalized_type not in {UserRole.DOCTOR.value, UserRole.NURSE.value}:
+            raise HTTPException(status_code=400, detail="Provider type must be doctor or nurse")
+        query = query.where(ProviderProfile.provider_type == normalized_type)
     rows = db.execute(query).all()
     cards = []
     today = __import__("datetime").date.today()
