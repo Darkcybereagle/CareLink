@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Alert, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../../App";
@@ -12,12 +12,15 @@ export default function AIIntakeScreen({ navigation }: Props) {
   const [duration, setDuration] = useState("");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<AIIntakeResponse | null>(null);
+  const scrollRef = useRef<ScrollView>(null);
 
   async function submit() {
     if (symptoms.trim().length < 3) return Alert.alert("CareLink AI", "Tell me briefly what you are experiencing.");
     setBusy(true);
     try {
-      setResult(await submitAIIntake(symptoms.trim(), duration.trim()));
+      const nextResult = await submitAIIntake(symptoms.trim(), duration.trim());
+      setResult(nextResult);
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     } catch (error) {
       Alert.alert("CareLink AI", error instanceof Error ? error.message : "Unable to process the intake.");
     } finally { setBusy(false); }
@@ -25,7 +28,7 @@ export default function AIIntakeScreen({ navigation }: Props) {
 
   return (
     <SafeAreaView style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
         <Pressable onPress={() => navigation.goBack()}><Text style={styles.back}>‹ Back</Text></Pressable>
         <Text style={styles.brand}>CareLink <Text style={styles.ai}>AI</Text></Text>
         <Text style={styles.title}>Tell me how you feel</Text>
@@ -49,13 +52,6 @@ export default function AIIntakeScreen({ navigation }: Props) {
           <View style={[styles.result, result.urgency === "emergency" ? styles.danger : undefined]}>
             <Text style={styles.resultTitle}>{result.urgency === "emergency" ? "Urgent attention needed" : "Your CareLink pathway"}</Text>
             <Text style={styles.resultText}>{result.safety_message}</Text>
-            <Text style={styles.label}>Summary</Text>
-            <Text style={styles.resultText}>{result.summary}</Text>
-            <Text style={styles.label}>Next step</Text>
-            <Text style={styles.resultText}>{result.next_step}</Text>
-            <Text style={styles.label}>Clinician handoff</Text>
-            <Text style={styles.resultText}>{result.clinician_handoff}</Text>
-
             {result.urgency === "emergency" ? (
               <View style={styles.actions}>
                 <Pressable style={styles.emergencyButton} onPress={() => navigation.navigate("CareDirectory", { initialProviderType: "doctor" })}>
@@ -64,6 +60,7 @@ export default function AIIntakeScreen({ navigation }: Props) {
               </View>
             ) : (
               <View style={styles.actions}>
+                <Text style={styles.actionTitle}>Choose your next step</Text>
                 <Pressable style={styles.primary} onPress={() => navigation.navigate("CareDirectory", { initialProviderType: "nurse" })}>
                   <Text style={styles.primaryText}>Talk to a nurse</Text>
                 </Pressable>
@@ -75,6 +72,15 @@ export default function AIIntakeScreen({ navigation }: Props) {
                 </Pressable>
               </View>
             )}
+
+
+            <Text style={styles.label}>Summary</Text>
+            <Text style={styles.resultText}>{result.summary}</Text>
+            <Text style={styles.label}>Next step</Text>
+            <Text style={styles.resultText}>{result.next_step}</Text>
+            <Text style={styles.label}>Clinician handoff</Text>
+            <Text style={styles.resultText}>{result.clinician_handoff}</Text>
+
           </View>
         )}
       </ScrollView>
@@ -103,6 +109,7 @@ const styles = StyleSheet.create({
   resultTitle: { fontSize: 20, fontWeight: "800", color: colors.text },
   resultText: { color: colors.text, lineHeight: 22, marginTop: 4 },
   actions: { marginTop: spacing.md },
+  actionTitle: { color: colors.text, fontWeight: "800", fontSize: 17, marginBottom: spacing.xs },
   secondary: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.pill, paddingVertical: 14, alignItems: "center", marginTop: spacing.sm },
   secondaryText: { color: colors.primaryDark, fontWeight: "800" },
   emergencyButton: { backgroundColor: "#B42318", borderRadius: radius.pill, paddingVertical: 16, alignItems: "center", marginTop: spacing.md },
