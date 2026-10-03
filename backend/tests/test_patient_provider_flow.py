@@ -82,7 +82,7 @@ def test_provider_availability_validation(client):
 
 
 def test_empty_provider_discovery_is_not_server_error(client):
-    patient_token = register_and_login(client, "Empty Directory Patient", "empty.directory@carelink.example.com", "patient")
-    response = client.get("/api/v1/care/providers?provider_type=nurse", headers=auth(patient_token))
+    patient_headers = auth_header(client, "patient", "empty.directory@carelink.example.com")
+    response = client.get("/api/v1/care/providers?provider_type=nurse", headers=patient_headers)
     assert response.status_code == 200
     assert response.json() == []
