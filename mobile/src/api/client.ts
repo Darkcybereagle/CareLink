@@ -13,7 +13,12 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const body = await response.json().catch(() => ({}));
 
   if (!response.ok) {
-    const detail = typeof body.detail === "string" ? body.detail : undefined;
+    let detail: string | undefined;
+    if (typeof body.detail === "string") detail = body.detail;
+    else if (Array.isArray(body.detail)) detail = body.detail.map((item: any) => {
+      const field = Array.isArray(item?.loc) ? item.loc.filter((part: unknown) => part !== "body").join(".") : "request";
+      return `${field || "request"}: ${item?.msg || "Invalid value"}`;
+    }).join("\n");
     throw new Error(detail || `CareLink request failed (HTTP ${response.status}).`);
   }
   return body as T;
