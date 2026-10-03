@@ -37,7 +37,12 @@ def discover_providers(current_user: CurrentUser, db: DB, city: str | None = Non
         query = query.where(ProviderProfile.city.ilike(f"%{city.strip()}%"))
     if specialty:
         query = query.where(ProviderProfile.specialty.ilike(f"%{specialty.strip()}%"))
-    if provider_type:\n        normalized_type = provider_type.strip().lower()\n        if normalized_type not in {UserRole.DOCTOR.value, UserRole.NURSE.value}:\n            raise HTTPException(status_code=400, detail="Provider type must be doctor or nurse")\n        query = query.where(ProviderProfile.provider_type == normalized_type)\n    rows = db.execute(query).all()
+    if provider_type:
+        normalized_type = provider_type.strip().lower()
+        if normalized_type not in {UserRole.DOCTOR.value, UserRole.NURSE.value}:
+            raise HTTPException(status_code=400, detail="Provider type must be doctor or nurse")
+        query = query.where(ProviderProfile.provider_type == normalized_type)
+    rows = db.execute(query).all()
     cards = []
     today = __import__("datetime").date.today()
     for profile, user in rows:
