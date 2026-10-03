@@ -79,3 +79,10 @@ def test_provider_availability_validation(client):
         "day_of_week": 1, "start_time": "17:00:00", "end_time": "09:00:00",
     })
     assert response.status_code == 400
+
+
+def test_empty_provider_discovery_is_not_server_error(client):
+    patient_headers = auth_header(client, "patient", "empty.directory@carelink.example.com")
+    response = client.get("/api/v1/care/providers?provider_type=nurse", headers=patient_headers)
+    assert response.status_code == 200
+    assert response.json() == []
